@@ -1,0 +1,50 @@
+steps:
+  - id: 'CI-CD Pipeline build'
+    name: ubuntu
+    entrypoint: 'sh'
+    args:
+     - '-c'
+     - |
+        echo "$main"
+
+  - id: 'Terraform init'
+    name: 'hashicorp/terraform:1.0.0'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        terraform init
+
+  - id: 'Terraform fmt'
+    name: 'hashicorp/terraform:1.0.0'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        terraform fmt
+
+  - id: 'Terraform validate'
+    name: 'hashicorp/terraform:1.0.0'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        terraform validate
+
+  - id: 'Terraform Plan'
+    name: 'hashicorp/terraform:1.0.0'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        terraform validate
+
+  - id: 'Terraform apply'
+    name: 'hashicorp/terraform:1.0.0'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        ["$BRANCH_NAME" = "prod" ]
+        terraform apply -auto-approve
+
