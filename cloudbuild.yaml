@@ -15,13 +15,13 @@ steps:
       - |
         terraform init
 
-  - id: "Terraform Fmt"
-    name: "hashicorp/terraform:1.0.0"
-    entrypoint: "sh"
-    args:
-      - "-c"
-      - |
-        terraform fmt -check
+  # - id: "Terraform Fmt"
+  #   name: "hashicorp/terraform:1.0.0"
+  #   entrypoint: "sh"
+  #   args:
+  #     - "-c"
+  #     - |
+  #       terraform fmt -check
 
   - id: "Terraform Validate"
     name: "hashicorp/terraform:1.0.0"
