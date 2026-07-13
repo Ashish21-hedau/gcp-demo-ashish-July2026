@@ -1,50 +1,56 @@
 steps:
-  - id: 'CI-CD Pipeline build'
-    name: ubuntu
-    entrypoint: 'sh'
+  - id: "CI-CD Pipeline build"
+    name: "ubuntu"
+    entrypoint: "sh"
     args:
-     - '-c'
-     - |
-        echo "$main"
+      - "-c"
+      - |
+        echo "CI/CD Pipeline Started"
 
-  - id: 'Terraform init'
-    name: 'hashicorp/terraform:1.0.0'
-    entrypoint: 'sh'
+  - id: "Terraform Init"
+    name: "hashicorp/terraform:1.0.0"
+    entrypoint: "sh"
     args:
-      - '-c'
+      - "-c"
       - |
         terraform init
 
-  - id: 'Terraform fmt'
-    name: 'hashicorp/terraform:1.0.0'
-    entrypoint: 'sh'
+  - id: "Terraform Fmt"
+    name: "hashicorp/terraform:1.0.0"
+    entrypoint: "sh"
     args:
-      - '-c'
+      - "-c"
       - |
-        terraform fmt
+        terraform fmt -check
 
-  - id: 'Terraform validate'
-    name: 'hashicorp/terraform:1.0.0'
-    entrypoint: 'sh'
+  - id: "Terraform Validate"
+    name: "hashicorp/terraform:1.0.0"
+    entrypoint: "sh"
     args:
-      - '-c'
+      - "-c"
       - |
         terraform validate
 
-  - id: 'Terraform Plan'
-    name: 'hashicorp/terraform:1.0.0'
-    entrypoint: 'sh'
+  - id: "Terraform Plan"
+    name: "hashicorp/terraform:1.0.0"
+    entrypoint: "sh"
     args:
-      - '-c'
+      - "-c"
       - |
-        terraform validate
+        terraform plan -out=tfplan
 
-  - id: 'Terraform apply'
-    name: 'hashicorp/terraform:1.0.0'
-    entrypoint: 'sh'
+  - id: "Terraform Apply"
+    name: "hashicorp/terraform:1.0.0"
+    entrypoint: "sh"
     args:
-      - '-c'
+      - "-c"
       - |
-        ["$BRANCH_NAME" = "main" ]
-        terraform apply -auto-approve
+        if [ "$BRANCH_NAME" = "main" ]; then
+          terraform apply -auto-approve tfplan
+        else
+          echo "Not on main branch. Skipping apply."
+        fi
+
+options:
+  logging: CLOUD_LOGGING_ONLY
 
