@@ -1,0 +1,133 @@
+steps:
+# -------------------------------
+# Pipeline Start
+# -------------------------------
+- id: "Pipeline Start"
+  name: "ubuntu"
+  entrypoint: "bash"
+  args:
+    - "-c"
+    - |
+      echo "======================================"
+      echo "Terraform CI/CD Pipeline Started"
+      echo "Branch : $main"
+      echo "======================================"
+
+# -------------------------------
+# Terraform Init
+# -------------------------------
+- id: "Terraform Init"
+  name: "hashicorp/terraform:1.7.5"
+  waitFor: ["Pipeline Start"]
+  entrypoint: "sh"
+  args:
+    - "-c"
+    - |
+      terraform init
+
+# -------------------------------
+# Terraform Format Check
+# -------------------------------
+- id: "Terraform Format"
+  name: "hashicorp/terraform:1.7.5"
+  waitFor: ["Terraform Init"]
+  allowFailure: true
+  entrypoint: "sh"
+  args:
+    - "-c"
+    - |
+      terraform fmt -check -recursive
+
+# -------------------------------
+# Terraform Validate
+# -------------------------------
+- id: "Terraform Validate"
+  name: "hashicorp/terraform:1.7.5"
+  waitFor: ["Terraform Init"]
+  entrypoint: "sh"
+  args:
+    - "-c"
+    - |
+      terraform validate
+
+# -------------------------------
+# TFLint
+# -------------------------------
+- id: "TFLint"
+  name: "ghcr.io/terraform-linters/tflint:v0.58.1"
+  waitFor: ["Terraform Init"]
+  allowFailure: true
+  entrypoint: "sh"
+  args:
+    - "-c"
+    - |
+      echo "Initializing TFLint..."
+      tflint --init
+      echo "Running TFLint..."
+      tflint
+
+# -------------------------------
+# tfsec
+# -------------------------------
+- id: "tfsec"
+  name: "aquasec/tfsec:v1.28.13"
+  waitFor: ["Terraform Init"]
+  allowFailure: true
+  entrypoint: "sh"
+  args:
+    - "-c"
+    - |
+      echo "Running tfsec..."
+      tfsec .
+
+# -------------------------------
+# Checkov
+# -------------------------------
+- id: "Checkov"
+  name: "bridgecrew/checkov:3.2.469"
+  waitFor: ["Terraform Init"]
+  allowFailure: true
+  entrypoint: "sh"
+  args:
+    - "-c"
+    - |
+      echo "Running Checkov..."
+      checkov -d .
+
+# -------------------------------
+# Terraform Plan
+# -------------------------------
+- id: "Terraform Plan"
+  name: "hashicorp/terraform:1.7.5"
+  waitFor:
+    - "Terraform Validate"
+    - "Terraform Format"
+    - "TFLint"
+    - "tfsec"
+    - "Checkov"
+  entrypoint: "sh"
+  args:
+    - "-c"
+    - |
+      terraform plan -out=tfplan
+
+# -------------------------------
+# Terraform Apply
+# -------------------------------
+- id: "Terraform Apply"
+  name: "hashicorp/terraform:1.7.5"
+  waitFor:
+    - "Terraform Plan"
+  entrypoint: "sh"
+  args:
+    - "-c"
+    - |
+      if [ "$BRANCH_NAME" = "prod" ]; then
+        echo "Applying Terraform..."
+        terraform apply -auto-approve tfplan
+      else
+        echo "Skipping Apply. Current branch: $BRANCH_NAME"
+      fi
+
+options:
+  logging: CLOUD_LOGGING_ONLY

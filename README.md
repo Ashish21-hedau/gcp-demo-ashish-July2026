@@ -375,3 +375,19 @@ Display Output
 || | Multiline string |
 |echo | Text print karta hai |
 |$BRANCH_NAME | Current Git branch ka naam | -->
+<!-- 
+
+का मतलब है कि Google Cloud Build के दौरान बनने वाले logs केवल Cloud Logging में सेव होंगे, लोकल build logs bucket या default storage में नहीं।
+
+तीन सामान्य विकल्प होते हैं:
+
+CLOUD_LOGGING_ONLY ✅
+Logs केवल Google Cloud Logging में जाएंगे।
+Cloud Storage bucket में logs सेव नहीं होंगे।
+Production projects में अक्सर यही इस्तेमाल किया जाता है।
+GCS_ONLY
+Logs केवल Cloud Storage (GCS) bucket में सेव होंगे।
+Cloud Logging में नहीं दिखेंगे।
+LEGACY
+Logs Cloud Logging और Cloud Storage, दोनों में जा सकते हैं (पुराने behavior के अनुसार)।
+Backward compatibility के लिए है। -->
